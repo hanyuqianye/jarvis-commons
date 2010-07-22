@@ -19,7 +19,6 @@
 package org.divxdede.collection;
 
 import org.divxdede.commons.Disposable;
-import org.divxdede.commons.formatter.SimpleFormatter;
 
 import java.util.Collections;
 import java.util.HashMap;
