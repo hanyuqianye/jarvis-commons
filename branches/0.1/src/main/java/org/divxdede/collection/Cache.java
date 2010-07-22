@@ -630,11 +630,11 @@ public class Cache<K,V> implements Disposable , Iterable<V> {
 			return eldest;
 		}		
 		
-		/** Return an human readable interpretation of this entry
-		 */
-		public String toString() {
-			return SimpleFormatter.format("Entry[@%%,key=%%,value=%%,bullet=%%]", Integer.toHexString( System.identityHashCode(this) ) , getKey() , getValue() , this.bullet ); 
-		}
+//		/** Return an human readable interpretation of this entry
+//		 */
+//		public String toString() {
+//			return SimpleFormatter.format("Entry[@%%,key=%%,value=%%,bullet=%%]", Integer.toHexString( System.identityHashCode(this) ) , getKey() , getValue() , this.bullet );
+//		}
 	}
 	
 	/** A FrequencyBullet is a container that holds all FrequencyEntries for the same specified frequency.
@@ -782,10 +782,10 @@ public class Cache<K,V> implements Disposable , Iterable<V> {
 			};
 		}
 		
-		/** Return an human readable interpretation of this entry
-		 */
-		public String toString() {
-			return SimpleFormatter.format("Bullet[@%%,frequency=%%]", Integer.toHexString( System.identityHashCode(this) ) , getFrequency() );
-		}
+//		/** Return an human readable interpretation of this entry
+//		 */
+//		public String toString() {
+//			return SimpleFormatter.format("Bullet[@%%,frequency=%%]", Integer.toHexString( System.identityHashCode(this) ) , getFrequency() );
+//		}
 	}	
 }
