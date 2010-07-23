@@ -131,11 +131,13 @@ public abstract class ImageUtilities {
         waitFor(image);
         
         // Original ratio
-        float originalRatio = (float)image.getWidth(null) / (float) image.getHeight(null);
+        float   originalRatio = (float)image.getWidth(null) / (float) image.getHeight(null);
+        boolean aspectRatioRespected = width < 0 || height < 0;
+        boolean sizePreserved = width < 0 && height < 0;
 
         // new size
         int newWidth  = width;
-        int newHeight = height; 
+        int newHeight = height;
 
         // if all size are to 0, don't perform a resising (it's use for image conversion into a BufferedImage)
         if( newWidth < 0 && newHeight < 0 ) 
@@ -145,9 +147,15 @@ public abstract class ImageUtilities {
         }
         else
         {
-                 if ( newWidth  < 0 ) newWidth  = (int)(newHeight * originalRatio);
-            else if ( newHeight < 0 ) newHeight = (int)(newWidth / originalRatio);
+             if ( newWidth  < 0 ) newWidth  = (int)(newHeight * originalRatio);
+             else if ( newHeight < 0 )  newHeight = (int)(newWidth / originalRatio);
+             else {
+                /** Precision is not garanteed, but it's not a big problem here
+                 */
+                aspectRatioRespected = ( (float)newWidth / (float)newHeight ) == originalRatio;
+             }
         }
+        sizePreserved = sizePreserved || ( newWidth == image.getWidth(null) && newHeight == image.getWidth(null) );
 
         /** define type of destination image from source image
          */
@@ -158,21 +166,67 @@ public abstract class ImageUtilities {
             type    = ((BufferedImage)image).getType();
         }
 
+        /** Indicate if it's a recuce scale or not
+         *  It's better to reduce an image by factor of 2 until we reach the desired size.
+         *  So, if the ratio is preserved and if this scaling is a reduce scale, we will go by iteration
+         */
+        boolean reducingByIteration = aspectRatioRespected && !sizePreserved && newWidth <= image.getWidth(null) && newHeight <= image.getHeight(null);
+        if( reducingByIteration ) {
+            Image   source      = image;
+            boolean isWidth     = image.getWidth(null) > image.getHeight(null);
+            int     currentSize = isWidth ? image.getWidth(null) : image.getHeight(null);
+            int     refSize     = isWidth ? newWidth : newHeight;
+            float   ratio       = isWidth ? ( (float)newHeight / (float)newWidth ) : ( (float)newWidth / (float)newHeight );
+
+            while( currentSize > refSize ) {
+                int myWidth  = 0;
+                int myHeight = 0;
+                
+                currentSize /= 2;
+                if( currentSize < refSize ) {
+                    myWidth  = newWidth;
+                    myHeight = newHeight;
+                }
+                else {
+                    if( isWidth ) {
+                        myWidth  = currentSize;
+                        myHeight = Math.round( myWidth * ratio );
+                        if( myHeight < newHeight ) myHeight = newHeight;
+                    }
+                    else {
+                        myHeight = currentSize;
+                        myWidth  = Math.round( myHeight * ratio );
+                        if( myWidth < newWidth ) myWidth = newWidth;
+                    }
+                }
+
+                source      = getScaledImageImpl( source , myWidth , myHeight ,type , opacity );
+                currentSize = isWidth ? myWidth : myHeight;
+            }
+            return (BufferedImage)source;
+        }
+        else {
+            return getScaledImageImpl( image , newWidth , newHeight , type , opacity );
+        }
+    }
+
+    /** Internal method for scale an image
+     */
+    private static BufferedImage getScaledImageImpl( Image source , int width , int height , int type , int opacity ) {
+
         // Create the result
-        BufferedImage scaledImage = GraphicsEnvironment.isHeadless() ? new  BufferedImage(newWidth, newHeight, type ) :
-                                    GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(newWidth,newHeight,opacity);
+        BufferedImage scaledImage = GraphicsEnvironment.isHeadless() ? new  BufferedImage(width, height, type ) :
+                                    GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(width,height,opacity);
 
         // render
         Graphics2D    graphics2D  = scaledImage.createGraphics();
         try {
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            graphics2D.drawImage(image, 0, 0, newWidth, newHeight, null);
+            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics2D.drawImage( source , 0, 0, width , height , null);
         }
         finally {
             graphics2D.dispose();
         }
-
-        // return
         return scaledImage;
     }
 }
