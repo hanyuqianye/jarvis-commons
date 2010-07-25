@@ -1,28 +1,49 @@
 package org.divxdede.commons.formatter;
 
 /**
- * Formatteur d'une chaine de caractères substituant les motifs %% par des arguments.
- * L'objectif est de proposer une substitution simple et rapide (sans conversion & mise en forme) contrairement à java.util.Formatter (plus complexe et plus riche)
- *
- * Utilisation:
- *   String result = SimpleFormatter.format("%% factures générées par %%" , 125 , "infass" );
+ * A simple string formatter giving an easy, readable and efficient way to concatenates strings.
+ * <p>
+ * This <code>formatter</code> provide a substituion of any <strong><code>%%</code></strong> by the specified argument.<br>
+ * Each argument's are formatted accordingly their {@link Object#toString()} methods.
+ * <p>
+ * Exemple:
+ * <pre>
+ *    String result = SimpleFormatter.format("%% documents sent by %%" , 125 , "Mr. Anderson");
+ *    System.out.println(result);
+ * </pre>
+ * giving:
+ * <pre>
+ *    125 documents sent by Mr. Anderson
+ * </pre>
  *
  * @author André Sébastien
+ * @since 0.2
  */
-public class SimpleFormatter {
+public final class SimpleFormatter {
     
-    /** Creates a new instance of SimpleFormatter */
+    /** private constructor, no instanciation
+     */
     private SimpleFormatter() {
-        
     }
 
-    /** Mise en forme d'une chaîne de caractères en remplacant les motifs %% par les arguments spécifiés
-     *  Exemple: SimpleFormatter.format("Bonjour M. %%, voulez vous %% avec moi" , "Anderson" , "venir"); 
+    /** Format a {@link String} by replacing each <strong><code>%%</code></strong> occurrences by the specified arguments.<br>
+     *  Each arguments are formatted accordingly to their {@link Object.toString()} methods.
+     *  <p>
+     *  Exemple:
+     *  <pre>
+     *      String result = SimpleFormatter.format("Hello Mr. %% !! You take the %% pill" , "Anderson" , "pill");
+     *  </pre>
+     *  <p>
+     *  For some performance optimization, this method don't perform all pre-checks call.<br>
+     *  If you give less arguments than <code>%%</code> occurences then this method don't fails and let extra %% occurences as is.<br>
+     *  But in the counter parts, if you provide more argument's than <code>%%</code> occurences, this method will throw an IllegalArgumentException
      *
-     *  @param format Chaine à substitué en remplacant ces motifs %%
-     *  @param args Arguments de substitutions
+     *  @param format String used to build the result, each <code>%%</code> are replaced by the specified arguments.
+     *  @param args Subtitue arguments used for replace each <code>%%</code> occurences. The first argument replace the first %%, etc..
      *  
-     *  @return chaine formattée
+     *  @return String result
+     *  @throws IllegalArgumentException If args's length is not equals to the <code>%%</code> occurences.
+     *  @throws NullPointerException if <code>format</code> is null and args is no-empty
      */
     public static String format(String format , Object... args ) {
         if( args == null || args.length == 0 ) return format;
@@ -47,7 +68,7 @@ public class SimpleFormatter {
         String currentArgs         = null;
         while( strArgsIndex < args.length ) {
             formatPositionFin = format.indexOf("%%",formatPositionDebut);
-            if( formatPositionFin < 0 ) throw new IllegalArgumentException("Nombre d'arguments incorrect vis à vis du format");
+            if( formatPositionFin < 0 ) throw new IllegalArgumentException("Incorrect argument's count");
 
             format.getChars( formatPositionDebut , formatPositionFin , result , resultPosition);   
             resultPosition += (formatPositionFin - formatPositionDebut);
