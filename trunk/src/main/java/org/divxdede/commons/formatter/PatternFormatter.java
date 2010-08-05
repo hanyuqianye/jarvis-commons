@@ -166,6 +166,7 @@ import sun.misc.FormattedFloatingDecimal; // too complex to re-implement it...
  *
  * @author André Sébastien (divxdede)
  * @see java.util.Formatter
+ * @since 0.2
  */
 public class PatternFormatter {
 
