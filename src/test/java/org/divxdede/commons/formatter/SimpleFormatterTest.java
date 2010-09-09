@@ -1,5 +1,6 @@
 package org.divxdede.commons.formatter;
 
+import org.divxdede.text.formatter.SimpleFormatter;
 import java.awt.Color;
 
 /**
