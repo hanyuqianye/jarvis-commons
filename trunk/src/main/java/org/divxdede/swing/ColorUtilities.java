@@ -114,4 +114,17 @@ public class ColorUtilities {
         int[] rgb = org.jdesktop.swingx.graphics.ColorUtilities.HSLtoRGB( hsl[0] , hsl[1] , hsl[2] , null );
         return new Color( rgb[0] , rgb[1] , rgb[2] , color.getAlpha() );
     }
+
+    /** Derive a color to a translucent color.<br>
+     *  Create a color from another one by replacing the <code>alpha</code> channel but keeping <code>rgb</code> components.
+     *
+     *  @param color Color to derive.
+     *  @param alpha Alpha to use on the new derivated color. The alpha channel mst be in range [0 ~ 255]. 255 means an opaque color
+     *  @return The translucent color
+     *  @since 0.2
+     */
+    public static Color translucent(Color color , int alpha) {
+        if( color.getAlpha() == alpha ) return color;
+        return new Color( color.getRed() , color.getGreen() , color.getBlue() , alpha );
+    }
 }

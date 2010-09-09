@@ -222,6 +222,7 @@ public abstract class ImageUtilities {
         Graphics2D    graphics2D  = scaledImage.createGraphics();
         try {
             graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics2D.drawImage( source , 0, 0, width , height , null);
         }
         finally {
