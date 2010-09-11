@@ -212,6 +212,11 @@ public class TimeFormat extends Format {
                     else if( car == 's' )                  valueUnit = TimeUnit.SECONDS;
                     else if( car == '?' && nextCar == 's') valueUnit = TimeUnit.MICROSECONDS;
                     else if( car == 'n' && nextCar == 's') valueUnit = TimeUnit.NANOSECONDS;
+                    else {
+                        pos.setIndex( 0 );
+                        pos.setErrorIndex(i);
+                        return null;
+                    }
 
                     Number value = null;
                     try {
