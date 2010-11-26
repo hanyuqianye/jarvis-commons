@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 ANDRE Sébastien (divxdede).  All rights reserved.
+ * Copyright (c) 2010 INFASS Systèmes (http://www.infass.com) All rights reserved.
  * EnumerationIterator.java is a part of this Commons library
  * ====================================================================
  *
@@ -25,7 +25,7 @@ import  java.util.*;
  * This class is designed to be used with API that requires the old {@link Enumeration}
  * and you need to provide one from an {@link Iterator}
  *
- * @author André Sébastien - INFASS Systèmes (http://www.infass.com)
+ * @author André Sébastien (divxdede)
  */
 public class EnumerationIterator<E> implements Enumeration<E>
 {

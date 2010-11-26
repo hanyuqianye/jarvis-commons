@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 ANDRE Sébastien (divxdede).  All rights reserved.
+ * Copyright (c) 2010 INFASS Systèmes (http://www.infass.com) All rights reserved.
  * Disposable.java is a part of this Commons library
  * ====================================================================
  *

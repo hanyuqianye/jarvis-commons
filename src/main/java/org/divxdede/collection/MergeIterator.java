@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 ANDRE Sébastien (divxdede).  All rights reserved.
+ * Copyright (c) 2010 INFASS Systèmes (http://www.infass.com) All rights reserved.
  * MergeIterator.java is a part of this Commons library
  * ====================================================================
  *
@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
  * <p>
  * This implementation iterate sequentially over each iterators (in the parameter's order).
  *
- * @author André Sébastien - INFASS Systèmes (http://www.infass.com)
+ * @author André Sébastien (divxdede)
  */
 public class MergeIterator<E> implements Iterator<E> {
     

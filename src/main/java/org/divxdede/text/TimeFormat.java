@@ -151,7 +151,7 @@ public class TimeFormat extends Format {
         if( forced || micros > 0 ) {
             if( forced ) toAppendTo.append(' ');
             MICROSECOND_FORMAT.format( micros , toAppendTo , pos );
-            toAppendTo.append("?s");
+            toAppendTo.append("\u03bcs");
             forced  = (nanos) > 0;
         }
         if( forced || nanos > 0 ) {
@@ -210,7 +210,7 @@ public class TimeFormat extends Format {
                     else if( car == 'm' && nextCar == 's') valueUnit = TimeUnit.MILLISECONDS;
                     else if( car == 'm' )                  valueUnit = TimeUnit.MINUTES;
                     else if( car == 's' )                  valueUnit = TimeUnit.SECONDS;
-                    else if( car == '?' && nextCar == 's') valueUnit = TimeUnit.MICROSECONDS;
+                    else if( car == '\u03bc' && nextCar == 's') valueUnit = TimeUnit.MICROSECONDS;
                     else if( car == 'n' && nextCar == 's') valueUnit = TimeUnit.NANOSECONDS;
                     else {
                         pos.setIndex( 0 );

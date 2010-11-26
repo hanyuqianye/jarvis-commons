@@ -50,6 +50,60 @@ public class Arrays {
         return array;
     }
 
+    /**
+     * Concatenates multiples arrays.
+     * <p>
+     * If only one array is non empty, then this method return this array.<br>
+     * Otherwise, a new array is created representing all specified arrays concatenation.
+     *
+     * @param   arrays Arrays to concatenes.
+     * @return  concatenation result.
+     */
+    public static <E> E[] concat(E[]... arrays) {
+        if (arrays == null) {
+            return null;
+        }
+
+        int length = 0;
+        int count = 0;
+        E[] firstNotEmpty = null;
+        E[] firstNotNull = null;
+        for (E[] array : arrays) {
+            if (array != null) {
+                if (firstNotNull == null) {
+                    firstNotNull = array;
+                }
+                if (array.length > 0) {
+                    if (firstNotEmpty == null) {
+                        firstNotEmpty = array;
+                    }
+                    count++;
+                    length += array.length;
+                }
+            }
+        }
+
+        if (count == 0) {
+            if (firstNotNull != null) {
+                return firstNotNull;
+            }
+            return null;
+        }
+        if (count == 1) {
+            return firstNotEmpty;
+        }
+
+        E[] result = (E[]) java.lang.reflect.Array.newInstance(firstNotNull.getClass().getComponentType(), length);
+
+        int index = 0;
+        for (E[] array : arrays) {
+            if (array != null && array.length > 0) {
+                System.arraycopy(array, 0, result, index, array.length);
+                index += array.length;
+            }
+        }
+        return result;
+    }
 
     /** Randomizer object
      *  Private implementation
