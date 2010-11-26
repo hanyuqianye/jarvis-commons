@@ -4,7 +4,7 @@
     <artifactId>commons</artifactId>
     <packaging>jar</packaging>
     <version>0.2</version>
-    <name>commons</name>
+    <name>commons 0.2</name>
     <url>http://code.google.com/p/jarvis-commons</url>
 
     <description>Commons library</description>
