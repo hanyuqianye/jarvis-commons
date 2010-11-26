@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 ANDRE Sébastien (divxdede).  All rights reserved.
+ * Copyright (c) 2010 INFASS Systèmes (http://www.infass.com) All rights reserved.
  * Cache.java is a part of this Commons library
  * ====================================================================
  *
@@ -51,7 +51,7 @@ import java.util.NoSuchElementException;
  *  <p>
  *  This cache implementation is thread-safe by default because we thinks that these objects are often build for be used in a concurrent architecture.
  *
- * @author André Sébastien - INFASS Systèmes (http://www.infass.com)
+ * @author André Sébastien (divxdede)
  */
 public class Cache<K,V> implements Disposable , Iterable<V> {
 

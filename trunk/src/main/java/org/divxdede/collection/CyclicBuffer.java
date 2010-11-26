@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 ANDRE Sébastien (divxdede).  All rights reserved.
+ * Copyright (c) 2010 INFASS Systèmes (http://www.infass.com) All rights reserved.
  * CyclicBuffer.java is a part of this Commons library
  * ====================================================================
  *
@@ -189,7 +189,29 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
         if( index < 0 || index >= size() ) throw new IllegalArgumentException("index " + index + " out of bound");
         return (E)array[ logicalIndexToPhysicalIndex(index) ];
     }
-    
+
+    /** Returns the last inserted item inside this cyclic buffer.
+     *  @return The last inserted item inside this cyclic buffer.
+     *  @see #getFirst()
+     *  @since 0.2
+     */
+    public E getLast() {
+        if( isEmpty() ) return null;
+        int i = offset--;
+        if( i < 0 ) i = getCapacity() - 1;
+        return (E)array[i];
+    }
+
+    /** Returns the oldest inserted item inside this cyclic buffer that was not yet evicted.
+     *  @return The oldest inserted item inside this cyclic buffer that was not yet evicted.
+     *  @see #getLast()
+     *  @since 0.2
+     */
+    public E getFirst() {
+        if( isEmpty() ) return null;
+        return (E)array[ getFirstElementPhysicalIndex() ];
+    }
+
     /** Set an object at a specified index
      *  Be careful, this buffer is cyclic, that mean that an object can be moved inside this buffer.<br>
      *  This method is not thread-safe, and should be used carefully
