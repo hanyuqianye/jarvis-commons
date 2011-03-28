@@ -48,7 +48,8 @@ import java.util.Queue;
 public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
     
     private Object[] array    = null;
-    private int      offset   = 0;
+    private int      start    = 0;  // included index
+    private int      end      = 0;  // excluded index
     private int      count    = 0;
     private int      modCount = 0;
 
@@ -172,10 +173,20 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      *            prevents it from being added to this collection.
      */
     public boolean add(E o) {
-        array[offset++] = o;
-        if( count < getCapacity() ) count++;
-        if( offset >= getCapacity() ) offset = 0;
-        
+        if( end == start && !isEmpty() ) {
+            // We will override the oldest entry by the new one
+            start++;
+            if( start == getCapacity() ) start = 0;
+        }
+
+        // set the new entry
+        array[end++] = o;
+        if( end == getCapacity() ) end = 0;
+
+        // update the size() of this collection
+        count = Math.min( count + 1 , getCapacity() );
+
+        // return the success
         modCount++;
         return true;
     }
@@ -197,9 +208,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      */
     public E getLast() {
         if( isEmpty() ) return null;
-        int i = offset--;
-        if( i < 0 ) i = getCapacity() - 1;
-        return (E)array[i];
+        return get( size() - 1 );
     }
 
     /** Returns the oldest inserted item inside this cyclic buffer that was not yet evicted.
@@ -209,7 +218,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      */
     public E getFirst() {
         if( isEmpty() ) return null;
-        return (E)array[ getFirstElementPhysicalIndex() ];
+        return get(0);
     }
 
     /** Set an object at a specified index
@@ -224,9 +233,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
     /** Return the physical index inside the backed array for the first element of this buffer
      */
     private int getFirstElementPhysicalIndex() {
-        if( size() < getCapacity() ) return 0;
-        int start = offset + 1;
-        return start == getCapacity() ? 0 : start;
+        return start;
     }
     
     /** Convert a logical index (index in the buffer coordinate) into a physical index (index in the backed array coordinate)
@@ -272,8 +279,9 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      * 		  not supported by this collection.
      */
     public void clear() {
+        start  = 0;
+        end    = 0;
         count  = 0;
-        offset = 0;
         Arrays.fill( array , 0 , array.length , null );
         modCount++;
     }
@@ -297,13 +305,18 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      *         queue is empty.
      */
     public synchronized E poll() {
-        if( count == 0 ) return null;
+        if( isEmpty() ) return null;
+
+        // give result
+        E result = getLast();
         
-        offset--;
-        if( offset < 0 ) offset = getCapacity() - 1;
+        // remove
+        end--;
+        count--;
+        if( end < 0 ) end = getCapacity() - 1;
         
         modCount++;
-        return (E)array[offset];
+        return result;
     }
 
     /**
@@ -315,7 +328,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      * @throws NoSuchElementException if this queue is empty.
      */
     public synchronized E remove() {
-        if( count == 0 ) throw new NoSuchElementException();
+        if( isEmpty() ) throw new NoSuchElementException();
         return poll();
     }
 
@@ -327,13 +340,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      * is empty.
      */
     public synchronized E peek() {
-        if( count == 0 ) return null;
-        
-        int index = offset - 1;
-        if( index < 0 ) index = getCapacity() - 1;
-        
-        modCount++;
-        return (E)array[index];
+        return getLast();
     }
 
     /**
@@ -345,7 +352,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      * @throws NoSuchElementException if this queue is empty.
      */
     public synchronized E element() {
-        if( count == 0 ) throw new NoSuchElementException();
+        if( isEmpty() ) throw new NoSuchElementException();
         return peek();
     }
     
@@ -355,13 +362,13 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      */
     public void setCapacity(int newCapacity) {
         if( newCapacity <= 0 ) throw new IllegalArgumentException("capacity can't be less than 1");
+
+        int oldSize = size();
         this.array  = toArrayImpl( new Object[newCapacity] );
-        
-        this.count  = size() > newCapacity ? newCapacity : size();
-        
-        this.offset = this.count;
-        if( this.offset >= size() ) this.offset = 0;
-        
+        this.start  = 0;
+        this.end    = oldSize > newCapacity ? 0 : oldSize;
+        this.count  = oldSize > newCapacity ? newCapacity : oldSize;
+
         modCount++;
     }
     
@@ -378,45 +385,21 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
         if( newSize <= 0) throw new IllegalArgumentException("size can't be less than 1");
 
         if( array != null ) {
-            /** 
-             *                                   OFFSET
-             *                    0     1     2     3     4     5     6     7    8      9    10    11  
-             *    Source        [10]  [11]  [12]  [04]  [05]  [06]  [07]  [08]  [09]                    (offset=3, count=9 , size=9)
-             *    Cas A (>>)    [04]  [05]  [06]  [07]  [08]  [09]  [10]  [11]  [12]  [  ]  [  ]  [  ]  (offset=9, count=9 , size=11)
-             *    Cas B (<<)    [07]  [08]  [09]  [10]  [11]  [12]                                      (offset=0, count=6 , size=6)
-             *                   
-             */
-            
-            // Nombre de données à reprendre
-            int newCount = count > newSize ? newSize : count;   // Cas A = 9  ;;; Cas B = 6                     
-            int copied   = newCount;                            // Cas A = 9  ;;; Cas B = 6                     
-            int skipped  = count - copied;                      // Cas A = 0  ;;; Cas B = 3
-            
-            int traited   = 0;  
-            int newOffset = 0;
-            if(  count > offset ) {
-                // Si les données à partir d'offset sont occupées (c'est d'anciennes données), alors on commence par les recopier.
-                int skippable = getCapacity() - offset;               // Cas A = 6  ;;; Cas B = 6               
-                if( skipped < skippable ) {                    // Arrive dans les deux cas
-                    int length = skippable - skipped;          // Cas A = 6  ;;; Cas B = 3
+            int copied   = count > newSize ? newSize : count;
+            int skipped  = count - copied;                    
 
-                    // Cas A : On copie à partir de 3 jusqu'a 8 => [04]  [05]  [06]  [07]  [08]  [09]
-                    // Cas B : On copie à partir de 6 jusqu'a 8 => [07]  [08]  [09]
-                    System.arraycopy( array , offset + skipped , result , newOffset , length );
-                    skipped    = 0;                            // Cas A = 0  ;;; Cas B = 0
-                    copied     = copied - length;              // Cas A = 3  ;;; Cas B = 3
-                    newOffset += length;                       // Cas A = 6  ;;; Cas B = 3
-                }
-                else {
-                    // On veut ignorer plus de slots que l'on peut en copier lors de cette phase, on ne fait rien, si ce n'est compter ceux déja ignorer
-                    skipped = skipped - skippable;
-                }
+            int effectiveStart = start;
+            effectiveStart += skipped;
+            if( effectiveStart >= getCapacity() ) {
+                effectiveStart = effectiveStart - getCapacity();
             }
-            if( copied > 0)  {
-                //                                                    0     1     2      3     4     5      6     7     8
-                // Cas A : On copie à partir de 0 jusqu'a 2 EN 6 => [04]  [05]  [06]   [07]  [08]  [09] + [10]  [11]  [12]
-                // Cas B : On copie à partir de 0 jusqu'a 2 EN 3 => [07]  [08]  [09] + [10]  [11]  [12]
-                System.arraycopy( array , 0 + skipped , result , newOffset , copied );
+
+            if( end > effectiveStart ) {
+                System.arraycopy( array , effectiveStart , result , 0 ,  end - effectiveStart );
+            }
+            else {
+                System.arraycopy( array , effectiveStart , result , 0 , getCapacity() - effectiveStart );
+                System.arraycopy( array , 0 , result , getCapacity() - effectiveStart , end );
             }
         }
         return result;
@@ -426,7 +409,7 @@ public class CyclicBuffer<E> extends AbstractCollection<E> implements Queue<E> {
      */
     private class Itr implements Iterator<E> {
         
-        int shift            = size() > offset ? offset : 0;
+        int shift            = start;
         int current          = 0;
         
         int expectedModCount = modCount;
