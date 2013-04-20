@@ -3,7 +3,7 @@
     <groupId>org.divxdede</groupId>
     <artifactId>commons</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.3</version>
+    <version>0.2.4-SNAPSHOT</version>
     <name>commons</name>
     <url>http://code.google.com/p/jarvis-commons</url>
 
