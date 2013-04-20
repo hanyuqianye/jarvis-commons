@@ -123,7 +123,7 @@ public class Files {
 		FileOutputStream     fos = null;
 		BufferedOutputStream bos = null;
 		
-		byte[] buffer 		= new byte[4096];
+		byte[] buffer 		= new byte[64 * 1024];
 		int    bufferLength = 0;
 		try {
 			if( from instanceof BufferedInputStream ) {
