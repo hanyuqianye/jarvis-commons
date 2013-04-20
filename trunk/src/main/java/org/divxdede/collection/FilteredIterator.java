@@ -47,7 +47,6 @@ public class FilteredIterator<E> implements Iterator<E> {
         this.iterator = iterator;
     }
     
-    @Override
     public boolean hasNext() {
         if( poolNext ) return true;
         while( iterator.hasNext() ) {
@@ -62,7 +61,6 @@ public class FilteredIterator<E> implements Iterator<E> {
         return false;
     }
 
-    @Override
     public E next() {
         if( ! hasNext() ) throw new NoSuchElementException();
         try {
@@ -74,7 +72,6 @@ public class FilteredIterator<E> implements Iterator<E> {
         }
     }
 
-    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }

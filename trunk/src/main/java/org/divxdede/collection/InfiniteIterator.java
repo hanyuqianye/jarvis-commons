@@ -42,7 +42,6 @@ public class InfiniteIterator<E> implements Iterator<E> {
         this.iterable = iterable;
     }
 
-    @Override
     public boolean hasNext() {
         if( current != null ) {
             if( !current.hasNext() ) current = null; // start a new iterator
@@ -57,13 +56,11 @@ public class InfiniteIterator<E> implements Iterator<E> {
         return false;
     }
 
-    @Override
     public E next() {
         if( ! hasNext() ) throw new NoSuchElementException();
         return current.next();
     }
 
-    @Override
     public void remove() {
         if( current == null ) throw new IllegalStateException();
         current.remove();
